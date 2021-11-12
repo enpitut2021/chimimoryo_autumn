@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ElevatedButton(
           child: const Text("起動する"),
           onPressed: () async {
-            const url = "line://pay/generateQR";
+            const url = "https://line.me/R/pay/generateQR";
             await canLaunch(url)
                 ? await launch(url)
                 : throw 'Could not launch $url';
