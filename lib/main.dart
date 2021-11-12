@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,7 +37,12 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: ElevatedButton(
           child: const Text("起動する"),
-          onPressed: () {},
+          onPressed: () async {
+            const url = "line://pay/generateQR";
+            await canLaunch(url)
+                ? await launch(url)
+                : throw 'Could not launch $url';
+          },
         ),
       ),
     );
