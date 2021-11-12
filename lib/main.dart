@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
               "https://www.paypay.ne.jp/app/cashier",
             ];
             final select = Random().nextInt(urls.length);
-            final selectedUrl = urls[select];
+            var selectedUrl = urls[select];
             if (Platform.isAndroid) {
               AndroidIntent intent = AndroidIntent(
                 action: 'action_view',
@@ -55,6 +55,9 @@ class _MyHomePageState extends State<MyHomePage> {
               );
               await intent.launch();
             } else if (Platform.isIOS) {
+              if (selectedUrl == "https://www.paypay.ne.jp/app/cashier") {
+                selectedUrl = 'paypay://';
+              }
               await canLaunch(selectedUrl)
                   ? await launch(selectedUrl)
                   : throw 'Could not launch $selectedUrl';
