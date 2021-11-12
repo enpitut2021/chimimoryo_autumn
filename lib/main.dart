@@ -1,5 +1,8 @@
+import 'dart:io' show Platform;
+import 'dart:math';
+
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,10 +41,19 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ElevatedButton(
           child: const Text("起動する"),
           onPressed: () async {
-            const url = "https://line.me/R/pay/generateQR";
-            await canLaunch(url)
-                ? await launch(url)
-                : throw 'Could not launch $url';
+            final urls = [
+              'https://line.me/R/pay/generateQR',
+              "https://www.paypay.ne.jp/app/cashier",
+            ];
+            final select = Random().nextInt(urls.length);
+            final selectedUrl = urls[select];
+            if (Platform.isAndroid) {
+              AndroidIntent intent = AndroidIntent(
+                action: 'action_view',
+                data: selectedUrl,
+              );
+              await intent.launch();
+            }
           },
         ),
       ),
