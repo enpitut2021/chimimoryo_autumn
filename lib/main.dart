@@ -34,27 +34,42 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  Future<void> launchRandomPay() async {
+    final urls = [
+      'https://line.me/R/pay/generateQR',
+      "https://www.paypay.ne.jp/app/cashier",
+    ];
+    final select = Random().nextInt(urls.length);
+    final selectedUrl = urls[select];
+    if (Platform.isAndroid) {
+      AndroidIntent intent = AndroidIntent(
+        action: 'action_view',
+        data: selectedUrl,
+      );
+      await intent.launch();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          child: const Text("起動する"),
-          onPressed: () async {
-            final urls = [
-              'https://line.me/R/pay/generateQR',
-              "https://www.paypay.ne.jp/app/cashier",
-            ];
-            final select = Random().nextInt(urls.length);
-            final selectedUrl = urls[select];
-            if (Platform.isAndroid) {
-              AndroidIntent intent = AndroidIntent(
-                action: 'action_view',
-                data: selectedUrl,
-              );
-              await intent.launch();
-            }
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              child: const Text("ファミリーマート"),
+              onPressed: launchRandomPay,
+            ),
+            ElevatedButton(
+              child: const Text("セブンイレブン"),
+              onPressed: launchRandomPay,
+            ),
+            ElevatedButton(
+              child: const Text("ローソン"),
+              onPressed: launchRandomPay,
+            ),
+          ],
         ),
       ),
     );
