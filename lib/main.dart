@@ -35,6 +35,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var valueRate = {
+    "SevenEleven": {"Paypay": 1, "Linepay": 1}
+  };
+
   Future<void> launchRandomPay() async {
     final urls = [
       'https://line.me/R/pay/generateQR',
