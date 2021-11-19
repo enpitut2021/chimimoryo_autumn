@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:quiver/iterables.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,14 +37,21 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var valueRate = {
-    "SevenEleven": {"Paypay": 1, "Linepay": 1}
+    "SevenEleven": {"Linepay": 2, "Paypay": 1},
+    "Lawson": {"Linepay": 2, "Paypay": 1},
+    "FamilyMart": {"Linepay": 2, "Paypay": 1},
   };
 
-  Future<void> launchRandomPay() async {
-    final urls = [
-      'https://line.me/R/pay/generateQR',
-      "https://www.paypay.ne.jp/app/cashier",
-    ];
+  Future<void> launchRandomPay(String storeName) async {
+    const linepayPath = 'https://line.me/R/pay/generateQR';
+    const paypayPath = 'https://www.paypay.ne.jp/app/cashier';
+    var urls = [];
+    for (final _ in range(valueRate[storeName]!["Linepay"]!)) {
+      urls.add(linepayPath);
+    }
+    for (final _ in range(valueRate[storeName]!["Paypay"]!)) {
+      urls.add(paypayPath);
+    }
     final select = Random().nextInt(urls.length);
     var selectedUrl = urls[select];
     if (Platform.isAndroid) {
@@ -71,15 +79,21 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             ElevatedButton(
               child: const Text("ファミリーマート"),
-              onPressed: launchRandomPay,
+              onPressed: () {
+                launchRandomPay('FamilyMart');
+              },
             ),
             ElevatedButton(
               child: const Text("セブンイレブン"),
-              onPressed: launchRandomPay,
+              onPressed: () {
+                launchRandomPay('SevenEleven');
+              },
             ),
             ElevatedButton(
               child: const Text("ローソン"),
-              onPressed: launchRandomPay,
+              onPressed: () {
+                launchRandomPay('Lawson');
+              },
             ),
           ],
         ),
