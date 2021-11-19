@@ -77,20 +77,23 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              child: const Text("ファミリーマート"),
+            IconButton(
+              icon: Image.asset("assets/images/familymart.png"),
+              iconSize: 128.0,
               onPressed: () {
                 launchRandomPay('FamilyMart');
               },
             ),
-            ElevatedButton(
-              child: const Text("セブンイレブン"),
+            IconButton(
+              icon: Image.asset("assets/images/lawson.png"),
+              iconSize: 128.0,
               onPressed: () {
                 launchRandomPay('SevenEleven');
               },
             ),
-            ElevatedButton(
-              child: const Text("ローソン"),
+            IconButton(
+              icon: Image.asset("assets/images/seveneleven.png"),
+              iconSize: 128.0,
               onPressed: () {
                 launchRandomPay('Lawson');
               },
