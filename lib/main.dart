@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,13 +41,20 @@ class _MyHomePageState extends State<MyHomePage> {
       "https://www.paypay.ne.jp/app/cashier",
     ];
     final select = Random().nextInt(urls.length);
-    final selectedUrl = urls[select];
+    var selectedUrl = urls[select];
     if (Platform.isAndroid) {
       AndroidIntent intent = AndroidIntent(
         action: 'action_view',
         data: selectedUrl,
       );
       await intent.launch();
+    } else if (Platform.isIOS) {
+      if (selectedUrl == "https://www.paypay.ne.jp/app/cashier") {
+        selectedUrl = 'paypay://';
+      }
+      await canLaunch(selectedUrl)
+          ? await launch(selectedUrl)
+          : throw 'Could not launch $selectedUrl';
     }
   }
 
