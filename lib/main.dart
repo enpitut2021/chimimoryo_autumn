@@ -35,6 +35,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    //アプリ起動時に一度だけ実行される
+    super.initState();
+    launchRandomPay();
+  }
+
   var valueRate = {
     "SevenEleven": {"Paypay": 1, "Linepay": 1}
   };
