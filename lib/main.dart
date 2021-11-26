@@ -46,10 +46,20 @@ class _MyHomePageState extends State<MyHomePage> {
     const linepayPath = 'https://line.me/R/pay/generateQR';
     const paypayPath = 'https://www.paypay.ne.jp/app/cashier';
     var urls = [];
-    for (final _ in range(valueRate[storeName]!["Linepay"]!)) {
+    var linepayRate = valueRate[storeName]!["Linepay"]!;
+    var paypayRate = valueRate[storeName]!["Paypay"]!;
+    if (linepayRate is! int) {
+      print("valueRate must be an int type.");
+      linepayRate = 0;
+    }
+    if (paypayRate is! int) {
+      print("valueRate must be an int type.");
+      paypayRate = 0;
+    }
+    for (final _ in range(linepayRate)) {
       urls.add(linepayPath);
     }
-    for (final _ in range(valueRate[storeName]!["Paypay"]!)) {
+    for (final _ in range(paypayRate)) {
       urls.add(paypayPath);
     }
     final select = Random().nextInt(urls.length);
