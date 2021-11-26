@@ -86,6 +86,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  home_widget:
+    dependency: "direct main"
+    description:
+      name: home_widget
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.4"
   js:
     dependency: transitive
     description:
@@ -238,6 +245,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  workmanager:
+    dependency: "direct main"
+    description:
+      name: workmanager
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.1"
 sdks:
   dart: ">=2.14.0 <3.0.0"
   flutter: ">=2.5.0"
