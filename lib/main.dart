@@ -36,7 +36,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var valueRate = {
+  final valueRate = {
     "SevenEleven": {"Linepay": 2, "Paypay": 1},
     "Lawson": {"Linepay": 2, "Paypay": 1},
     "FamilyMart": {"Linepay": 2, "Paypay": 1},
