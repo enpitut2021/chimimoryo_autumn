@@ -33,13 +33,18 @@
                 - advantages
                     - {random_payid_1}
                         - name: Linepay
-                        - coupons: users/{random_id1}/coupons/seven
+                        - coupons: [
+                            users/{random_userid_1}/stores/{random_storeid_1}/coupons/{random_couponid_2},
+                            users/{random_userid_1}/stores/{random_storeid_1}/coupons/{random_couponid_3}
+                            ]
                         - discounted_ratio: 0.01
                         - recommended_ratio: 4
                         - reduction_ratio: 0.06
                     - {random_payid_2}
                         - name: PayPay
-                        - coupons: users/{random_id1}/coupons/seven
+                        - coupons: [
+                            users/{random_userid_1}/stores/{random_storeid_1}/coupons/{random_couponid_1}
+                            ]
                         - discounted_ratio: 0.03
                         - recommended_ratio: 3
                         - reduction_ratio: 0.02
