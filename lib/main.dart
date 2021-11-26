@@ -56,10 +56,10 @@ class _MyHomePageState extends State<MyHomePage> {
       print("valueRate must be an int type.");
       paypayRate = 1;
     }
-    for (final _ in range(linepayRate)) {
+    for (var i = 0; i < linepayRate; i++) {
       urls.add(linepayPath);
     }
-    for (final _ in range(paypayRate)) {
+    for (var i = 0; i < paypayRate; i++) {
       urls.add(paypayPath);
     }
     final select = Random().nextInt(urls.length);
