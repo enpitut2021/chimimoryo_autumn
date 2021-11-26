@@ -50,11 +50,11 @@ class _MyHomePageState extends State<MyHomePage> {
     var paypayRate = valueRate[storeName]!["Paypay"]!;
     if (linepayRate is! int) {
       print("valueRate must be an int type.");
-      linepayRate = 0;
+      linepayRate = 1;
     }
     if (paypayRate is! int) {
       print("valueRate must be an int type.");
-      paypayRate = 0;
+      paypayRate = 1;
     }
     for (final _ in range(linepayRate)) {
       urls.add(linepayPath);
