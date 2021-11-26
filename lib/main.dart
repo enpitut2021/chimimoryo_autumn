@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:quiver/iterables.dart';
 
 void main() {
   runApp(const MyApp());
