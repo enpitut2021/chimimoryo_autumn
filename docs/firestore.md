@@ -5,53 +5,53 @@
 
 # 構造
 - users(collection)
-    - user_name1(document)
-        - advantages(割引率とか還元率といったお得度情報)(collection)
-            - store1(document)
-                - linepay(collection)
-                    - random_id(document)
-                        - coupons(field): user_name1のsevenのクーポン情報
-                        - discounted_ratio: 割引率
-                        - recommended_ratio: おすすめ度
-                        - reduction_ratio: 還元率
-                - paypay(collection)
-                    - random_id(document)
-                        - coupons(field): user_name1のsevenのクーポン情報
-                        - discounted_ratio: 割引率
-                        - recommended_ratio: おすすめ度
-                        - reduction_ratio: 還元率
-        - coupons(クーポン情報)
-            - store1(document)
-                - linepay(collection)
-                    - random_id(document)
-                        - descriptions: クーポン情報の文字列のarray
-                - paypay(collection)
-                    - random_id(document)
-                        - descriptions: クーポン情報の文字列のarray
+    - random_userid(document)
+        - name: (string) ユーザー名
+        - stores(collection)
+            - random_storeid(document)
+                - name: (string) 店名
+                - advantages(collection)
+                    - random_payid_1(document)
+                        - name: (string) payの名前
+                        - coupons: (array) nameのpayのクーポンのパスのarray
+                        - discounted_ratio: (number) 割引率
+                        - recommended_ratio: (number) おすすめ度
+                        - reduction_ratio: (number) 還元率
+                - coupons(collection)
+                    - random_couponid_1(document)
+                        - name: (string) payの名前
+                        - description: (string) クーポン情報
+
 
 # 具体例
-
 - users
-    - bc
-        - advantages
-            - seven
-                - linepay
-                    - {random_id}
-                        - coupons: users/bc/coupons/seven
+    - {random_userid_1}
+        - name: bc
+        - stores
+            - {random_storeid_1}
+                - name: seven
+                - advantages
+                    - {random_payid_1}
+                        - name: Linepay
+                        - coupons: users/{random_id1}/coupons/seven
                         - discounted_ratio: 0.01
                         - recommended_ratio: 4
                         - reduction_ratio: 0.06
-                - paypay
-                    - {random_id}
+                    - {random_payid_2}
+                        - name: PayPay
+                        - coupons: users/{random_id1}/coupons/seven
                         - discounted_ratio: 0.03
                         - recommended_ratio: 3
                         - reduction_ratio: 0.02
-        - coupons
-            - seven
-                - linepay
-                    - {random_id}
-                        - descriptions: [三ツ矢サイダー30円引き]
-                - paypay
-                    - {random_id}
-                        - descriptions: [コカコーラ20円引き, カップヌードル100円引き]
-    - sudame
+                - coupons
+                    - {random_couponid_1}
+                        - name: PayPay
+                        - description: コカコーラ20円引き
+                    - {random_couponid_2}
+                        - name: PayPay
+                        - description: カップヌードル100円引き
+                    - {random_couponid_3}
+                        - name: LinePay
+                        - description: 三ツ矢サイダー30円引き
+    - {random_userid_2}
+        - name: sudame
