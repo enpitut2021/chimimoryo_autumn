@@ -35,22 +35,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    //アプリ起動時に一度だけ実行される
-    super.initState();
-    launchRandomPay();
-  }
-
-  var valueRate = {
-    "SevenEleven": {"Paypay": 1, "Linepay": 1}
+  final valueRate = {
+    "SevenEleven": {"Linepay": 2, "Paypay": 1},
+    "Lawson": {"Linepay": 2, "Paypay": 1},
+    "FamilyMart": {"Linepay": 2, "Paypay": 1},
   };
 
-  Future<void> launchRandomPay() async {
-    final urls = [
-      'https://line.me/R/pay/generateQR',
-      "https://www.paypay.ne.jp/app/cashier",
-    ];
+  @override
+  void initState() {
+    super.initState();
+    launchRandomPay("SevenEleven");
+  }
+
+  Future<void> launchRandomPay(String storeName) async {
+    const linepayPath = 'https://line.me/R/pay/generateQR';
+    const paypayPath = 'https://www.paypay.ne.jp/app/cashier';
+    var urls = [];
+    var linepayRate = valueRate[storeName]!["Linepay"]!;
+    var paypayRate = valueRate[storeName]!["Paypay"]!;
+    if (linepayRate is! int) {
+      print("valueRate must be an int type.");
+      linepayRate = 1;
+    }
+    if (paypayRate is! int) {
+      print("valueRate must be an int type.");
+      paypayRate = 1;
+    }
+    for (var i = 0; i < linepayRate; i++) {
+      urls.add(linepayPath);
+    }
+    for (var i = 0; i < paypayRate; i++) {
+      urls.add(paypayPath);
+    }
     final select = Random().nextInt(urls.length);
     var selectedUrl = urls[select];
     if (Platform.isAndroid) {
@@ -79,17 +95,23 @@ class _MyHomePageState extends State<MyHomePage> {
             IconButton(
               icon: Image.asset("assets/images/familymart.png"),
               iconSize: 128.0,
-              onPressed: launchRandomPay,
+              onPressed: () {
+                launchRandomPay('FamilyMart');
+              },
             ),
             IconButton(
               icon: Image.asset("assets/images/lawson.png"),
               iconSize: 128.0,
-              onPressed: launchRandomPay,
+              onPressed: () {
+                launchRandomPay('SevenEleven');
+              },
             ),
             IconButton(
               icon: Image.asset("assets/images/seveneleven.png"),
               iconSize: 128.0,
-              onPressed: launchRandomPay,
+              onPressed: () {
+                launchRandomPay('Lawson');
+              },
             ),
           ],
         ),
