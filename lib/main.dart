@@ -35,8 +35,6 @@ void callbackDispatcher() {
 
 /// Called when Doing Background Work initiated from Widget
 void backgroundCallback(Uri? data) async {
-  print(data);
-
   if (data!.host == 'titleclicked') {
     final greetings = 'こんにちは';
 
@@ -85,7 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    print('init');
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
   }
