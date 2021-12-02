@@ -71,6 +71,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (Platform.isAndroid) {
       final url = androidUrl[pay];
+      if (url == null) {
+        throw "不明なPayが指定されています";
+      }
       AndroidIntent intent = AndroidIntent(
         action: 'action_view',
         data: url,
