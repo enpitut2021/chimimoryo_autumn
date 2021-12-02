@@ -41,6 +41,21 @@ class _MyHomePageState extends State<MyHomePage> {
     "FamilyMart": {"Linepay": 2, "Paypay": 1},
   };
 
+  @override
+  void initState() {
+    super.initState();
+    getLocationAndLaunchPay();
+  }
+
+  void getLocationAndLaunchPay() {
+    launchRandomPay(getLocation());
+  }
+
+  String getLocation() {
+    // GPSを用いて店の情報を取得
+    return 'SevenEleven';
+  }
+
   Future<void> launchRandomPay(String storeName) async {
     const linepayPath = 'https://line.me/R/pay/generateQR';
     const paypayPath = 'https://www.paypay.ne.jp/app/cashier';
