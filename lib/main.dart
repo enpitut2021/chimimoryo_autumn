@@ -47,8 +47,10 @@ class _MyHomePageState extends State<MyHomePage> {
     getLocationAndLaunchPay();
   }
 
-  void getLocationAndLaunchPay() {
-    launchPay(getLocation());
+  void getLocationAndLaunchPay() async {
+    final store = getLocation();
+    final pay = await widget.repo.getRecommendedPay(store);
+    launchPay(pay);
   }
 
   String getLocation() {
