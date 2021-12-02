@@ -41,6 +41,21 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    getLocationAndLaunchPay();
+  }
+
+  void getLocationAndLaunchPay() {
+    launchPay(getLocation());
+  }
+
+  String getLocation() {
+    // TODO: GPSを用いて店の情報を取得
+    return 'seven_eleven';
+  }
+
   Future<void> launchPay(String pay) async {
     const androidUrl = {
       "PAY_PAY": "https://www.paypay.ne.jp/app/cashier",
