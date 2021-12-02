@@ -1,11 +1,14 @@
 import 'dart:io' show Platform;
-import 'dart:math';
 
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:chimimoryo_autumn/repository/repository.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -20,77 +23,68 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title})
+      : repo = Repository(),
+        super(key: key);
 
   final String title;
+  final Repository repo;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final valueRate = {
-    "SevenEleven": {"Linepay": 2, "Paypay": 1},
-    "Lawson": {"Linepay": 2, "Paypay": 1},
-    "FamilyMart": {"Linepay": 2, "Paypay": 1},
-  };
-
   @override
   void initState() {
     super.initState();
     getLocationAndLaunchPay();
   }
 
-  void getLocationAndLaunchPay() {
-    launchRandomPay(getLocation());
+  void getLocationAndLaunchPay() async {
+    final store = getLocation();
+    final pay = await widget.repo.getRecommendedPay(store);
+    launchPay(pay);
   }
 
   String getLocation() {
-    // GPSを用いて店の情報を取得
-    return 'SevenEleven';
+    // TODO: GPSを用いて店の情報を取得
+    return 'seven_eleven';
   }
 
-  Future<void> launchRandomPay(String storeName) async {
-    const linepayPath = 'https://line.me/R/pay/generateQR';
-    const paypayPath = 'https://www.paypay.ne.jp/app/cashier';
-    var urls = [];
-    var linepayRate = valueRate[storeName]!["Linepay"]!;
-    var paypayRate = valueRate[storeName]!["Paypay"]!;
-    if (linepayRate is! int) {
-      print("valueRate must be an int type.");
-      linepayRate = 1;
-    }
-    if (paypayRate is! int) {
-      print("valueRate must be an int type.");
-      paypayRate = 1;
-    }
-    for (var i = 0; i < linepayRate; i++) {
-      urls.add(linepayPath);
-    }
-    for (var i = 0; i < paypayRate; i++) {
-      urls.add(paypayPath);
-    }
-    final select = Random().nextInt(urls.length);
-    var selectedUrl = urls[select];
+  Future<void> launchPay(String pay) async {
+    const androidUrl = {
+      "PAY_PAY": "https://www.paypay.ne.jp/app/cashier",
+      "LINE_PAY": "https://line.me/R/pay/generateQR",
+    };
+
+    const iosUrl = {
+      "PAY_PAY": "paypay://",
+      "LINE_PAY": "https://line.me/R/pay/generateQR",
+    };
+
     if (Platform.isAndroid) {
+      final url = androidUrl[pay];
+      if (url == null) {
+        throw "不明なPayが指定されています";
+      }
       AndroidIntent intent = AndroidIntent(
         action: 'action_view',
-        data: selectedUrl,
+        data: url,
       );
       await intent.launch();
     } else if (Platform.isIOS) {
-      if (selectedUrl == "https://www.paypay.ne.jp/app/cashier") {
-        selectedUrl = 'paypay://';
+      final url = iosUrl[pay];
+      if (url == null) {
+        throw "不明なPayが指定されています";
       }
-      await canLaunch(selectedUrl)
-          ? await launch(selectedUrl)
-          : throw 'Could not launch $selectedUrl';
+      await launch(url);
     }
   }
 
@@ -104,22 +98,25 @@ class _MyHomePageState extends State<MyHomePage> {
             IconButton(
               icon: Image.asset("assets/images/familymart.png"),
               iconSize: 128.0,
-              onPressed: () {
-                launchRandomPay('FamilyMart');
+              onPressed: () async {
+                final pay = await widget.repo.getRecommendedPay("family_mart");
+                launchPay(pay);
               },
             ),
             IconButton(
               icon: Image.asset("assets/images/lawson.png"),
               iconSize: 128.0,
-              onPressed: () {
-                launchRandomPay('SevenEleven');
+              onPressed: () async {
+                final pay = await widget.repo.getRecommendedPay("lawson");
+                launchPay(pay);
               },
             ),
             IconButton(
               icon: Image.asset("assets/images/seveneleven.png"),
               iconSize: 128.0,
-              onPressed: () {
-                launchRandomPay('Lawson');
+              onPressed: () async {
+                final pay = await widget.repo.getRecommendedPay("seven_eleven");
+                launchPay(pay);
               },
             ),
           ],
