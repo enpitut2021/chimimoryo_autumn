@@ -44,7 +44,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    launchRandomPay("SevenEleven");
+    getLocationAndLaunchPay();
+  }
+
+  void getLocationAndLaunchPay() {
+    launchRandomPay(getLocation());
+  }
+
+  String getLocation() {
+    // GPSを用いて店の情報を取得
+    return 'SevenEleven';
   }
 
   Future<void> launchRandomPay(String storeName) async {
