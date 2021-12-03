@@ -1,14 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:io' show Platform;
 
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:chimimoryo_autumn/repository/repository.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:workmanager/workmanager.dart';
@@ -38,59 +33,39 @@ void callbackDispatcher() {
 
 /// Called when Doing Background Work initiated from Widget
 void backgroundCallback(Uri? data) async {
-  if (data!.host == 'titleclicked') {
-    final greetings = 'こんにちは';
+  print(data);
 
-    await HomeWidget.saveWidgetData<String>('title', greetings);
+  if (data!.host == 'titleclicked') {
+    final greetings = [
+      'Hello',
+      'こんにちは'
+    ];
+    final selectedGreeting = greetings[Random().nextInt(greetings.length)];
+
+    await HomeWidget.saveWidgetData<String>('title', selectedGreeting);
     await HomeWidget.updateWidget(
         name: 'HomeWidgetExampleProvider', iOSName: 'HomeWidgetExample');
   }
 }
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
-  await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(MaterialApp(home: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
+class MyApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Chimimoryo Autumn',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
+  _MyAppState createState() => _MyAppState();
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title})
-      : repo = Repository(),
-        super(key: key);
-
-  final String title;
-  final Repository repo;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class _MyAppState extends State<MyApp> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
-  // 将来ウィジェットにおける操作から何かを反映したい時用
   @override
   void initState() {
     super.initState();
-    getLocationAndLaunchPay();
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
   }
@@ -129,7 +104,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  // For load data in home widget
   Future<void> _loadData() async {
     try {
       Future.wait([
@@ -144,7 +118,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  // For send information to Home Widget
   Future<void> _sendAndUpdate() async {
     await _sendData();
     await _updateWidget();
@@ -154,7 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
     HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
   }
 
-  /// For PBI「おまけ：ウィジェット起動時とアプリ起動時で異なる動きができるかを調査」 in PBI4
   void _launchedFromWidget(Uri? uri) {
     if (uri != null) {
       showDialog(
@@ -166,84 +138,58 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  final valueRate = {
-    "SevenEleven": {"Linepay": 2, "Paypay": 1},
-    "Lawson": {"Linepay": 2, "Paypay": 1},
-    "FamilyMart": {"Linepay": 2, "Paypay": 1},
-  };
-
-  void getLocationAndLaunchPay() async {
-    final store = getLocation();
-    final pay = await widget.repo.getRecommendedPay(store);
-    launchPay(pay);
+  void _startBackgroundUpdate() {
+    Workmanager().registerPeriodicTask('1', 'widgetBackgroundUpdate',
+        frequency: Duration(minutes: 15));
   }
 
-  String getLocation() {
-    // TODO: GPSを用いて店の情報を取得
-    return 'seven_eleven';
-  }
-
-  Future<void> launchPay(String pay) async {
-    const androidUrl = {
-      "PAY_PAY": "https://www.paypay.ne.jp/app/cashier",
-      "LINE_PAY": "https://line.me/R/pay/generateQR",
-    };
-
-    const iosUrl = {
-      "PAY_PAY": "paypay://",
-      "LINE_PAY": "https://line.me/R/pay/generateQR",
-    };
-
-    if (Platform.isAndroid) {
-      final url = androidUrl[pay];
-      if (url == null) {
-        throw "不明なPayが指定されています";
-      }
-      AndroidIntent intent = AndroidIntent(
-        action: 'action_view',
-        data: url,
-      );
-      await intent.launch();
-    } else if (Platform.isIOS) {
-      final url = iosUrl[pay];
-      if (url == null) {
-        throw "不明なPayが指定されています";
-      }
-      await launch(url);
-    }
+  void _stopBackgroundUpdate() {
+    Workmanager().cancelByUniqueName('1');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('HomeWidget Example'),
+      ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
-              icon: Image.asset("assets/images/familymart.png"),
-              iconSize: 128.0,
-              onPressed: () async {
-                final pay = await widget.repo.getRecommendedPay("family_mart");
-                launchPay(pay);
-              },
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Title',
+              ),
+              controller: _titleController,
             ),
-            IconButton(
-              icon: Image.asset("assets/images/lawson.png"),
-              iconSize: 128.0,
-              onPressed: () async {
-                final pay = await widget.repo.getRecommendedPay("lawson");
-                launchPay(pay);
-              },
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Body',
+              ),
+              controller: _messageController,
             ),
-            IconButton(
-              icon: Image.asset("assets/images/seveneleven.png"),
-              iconSize: 128.0,
-              onPressed: () async {
-                final pay = await widget.repo.getRecommendedPay("seven_eleven");
-                launchPay(pay);
-              },
+            ElevatedButton(
+              onPressed: _sendAndUpdate,
+              child: Text('Send Data to Widget'),
             ),
+            ElevatedButton(
+              onPressed: _loadData,
+              child: Text('Load Data'),
+            ),
+            ElevatedButton(
+              onPressed: _checkForWidgetLaunch,
+              child: Text('Check For Widget Launch'),
+            ),
+            if (Platform.isAndroid)
+              ElevatedButton(
+                onPressed: _startBackgroundUpdate,
+                child: Text('Update in background'),
+              ),
+            if (Platform.isAndroid)
+              ElevatedButton(
+                onPressed: _stopBackgroundUpdate,
+                child: Text('Stop updating in background'),
+              )
           ],
         ),
       ),
