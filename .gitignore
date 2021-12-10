@@ -49,3 +49,6 @@ app.*.map.json
 
 
 google-services.json
+
+# Secret file for firebase
+chimimoryo-firebase-adminsdk-uwfpa-6cb6f788eb.json
