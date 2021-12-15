@@ -26,7 +26,6 @@ def insert_data(datas, collection_name):
         pay_name = data[0]
         store_name = data[2]
         benefits = re.findall(r"\d+", data[3])
-
         print(f"pay_name:{pay_name}, store_name:{store_name}, benefits:{benefits}")
         if len(benefits) != 1:
             print("benefits infomation is unexpected")
@@ -41,7 +40,6 @@ def insert_data(datas, collection_name):
             store_doc = db.collection(collection_name).document()
             store_doc.set({"store_name": store_name})
             print("insert store doc", store_doc)
-
             set_coupon(store_doc, pay_name, benefits)
         elif (
             len(current_doc) == 1
@@ -55,7 +53,6 @@ def insert_data(datas, collection_name):
 def get_data(csv_file_path):
     datas = []
     f = csv.reader(open(csv_file_path, "r"))
-
     for row in f:
         datas.append(row)
     return datas
@@ -73,6 +70,7 @@ if __name__ == "__main__":
         "--collection", type=str, help="import先のcollection", default="__beta_1210"
     )
     args = parser.parse_args()
+
     datas = get_data(args.path)
 
     insert_data(datas, args.collection)
