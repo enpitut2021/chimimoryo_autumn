@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:math';
 import 'dart:io' show Platform;
 
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:chimimoryo_autumn/models/store.dart';
 import 'package:chimimoryo_autumn/repository/repository.dart';
+import 'package:chimimoryo_autumn/repository/store.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
+
+import 'models/pay.dart';
 
 /// Used for Background Updates using Workmanager Plugin
 void callbackDispatcher() {
@@ -39,7 +40,7 @@ void callbackDispatcher() {
 /// Called when Doing Background Work initiated from Widget
 void backgroundCallback(Uri? data) async {
   if (data!.host == 'titleclicked') {
-    final greetings = 'こんにちは';
+    const greetings = 'こんにちは';
 
     await HomeWidget.saveWidgetData<String>('title', greetings);
     await HomeWidget.updateWidget(
@@ -90,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getLocationAndLaunchPay();
+    // getLocationAndLaunchPay();
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
   }
@@ -107,47 +108,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _titleController.dispose();
     _messageController.dispose();
     super.dispose();
-  }
-
-  Future<void> _sendData() async {
-    try {
-      Future.wait([
-        HomeWidget.saveWidgetData<String>('title', _titleController.text),
-        HomeWidget.saveWidgetData<String>('message', _messageController.text),
-      ]);
-    } on PlatformException catch (exception) {
-      debugPrint('Error Sending Data. $exception');
-    }
-  }
-
-  Future<void> _updateWidget() async {
-    try {
-      HomeWidget.updateWidget(
-          name: 'HomeWidgetExampleProvider', iOSName: 'HomeWidgetExample');
-    } on PlatformException catch (exception) {
-      debugPrint('Error Updating Widget. $exception');
-    }
-  }
-
-  // For load data in home widget
-  Future<void> _loadData() async {
-    try {
-      Future.wait([
-        HomeWidget.getWidgetData<String>('title', defaultValue: 'Default Title')
-            .then((value) => _titleController.text = value!),
-        HomeWidget.getWidgetData<String>('message',
-                defaultValue: 'Default Message')
-            .then((value) => _messageController.text = value!),
-      ]);
-    } on PlatformException catch (exception) {
-      debugPrint('Error Getting Data. $exception');
-    }
-  }
-
-  // For send information to Home Widget
-  Future<void> _sendAndUpdate() async {
-    await _sendData();
-    await _updateWidget();
   }
 
   void _checkForWidgetLaunch() {
@@ -217,34 +177,46 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: Image.asset("assets/images/familymart.png"),
-              iconSize: 128.0,
-              onPressed: () async {
-                final pay = await widget.repo.getRecommendedPay("family_mart");
-                launchPay(pay);
+        child: Builder(
+          builder: (context) {
+            final storeRepo = StoreRepository();
+            return FutureBuilder<List<Store>>(
+              future: storeRepo.getStores(),
+              builder: (context, snap) {
+                if (!snap.hasData) {
+                  return Container();
+                } else {
+                  final stores = snap.data;
+                  if (stores == null) {
+                    return Container();
+                  }
+                  return ListView.builder(
+                    itemBuilder: (context, index) {
+                      final store = stores[index];
+                      return ElevatedButton(
+                        onPressed: () {
+                          Pay maxBenefitPay = store.pays[0];
+                          num maxBenefit = store.pays[0].benefit;
+                          for (var pay in store.pays) {
+                            if (pay.benefit > maxBenefit) {
+                              maxBenefitPay = pay;
+                            }
+                          }
+                          if (maxBenefitPay.name == "LINE Pay") {
+                            launchPay("LINE_PAY");
+                          } else {
+                            launchPay("PAY_PAY");
+                          }
+                        },
+                        child: Text(store.name),
+                      );
+                    },
+                    itemCount: stores.length,
+                  );
+                }
               },
-            ),
-            IconButton(
-              icon: Image.asset("assets/images/lawson.png"),
-              iconSize: 128.0,
-              onPressed: () async {
-                final pay = await widget.repo.getRecommendedPay("lawson");
-                launchPay(pay);
-              },
-            ),
-            IconButton(
-              icon: Image.asset("assets/images/seveneleven.png"),
-              iconSize: 128.0,
-              onPressed: () async {
-                final pay = await widget.repo.getRecommendedPay("seven_eleven");
-                launchPay(pay);
-              },
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
