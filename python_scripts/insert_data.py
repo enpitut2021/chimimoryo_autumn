@@ -36,19 +36,18 @@ def insert_data(datas, collection_name):
         current_doc = (
             db.collection(collection_name).where("store_name", "==", store_name).get()
         )
-        if (
-            len(current_doc) == 1
-        ):  # `collection_name`コレクション内のドキュメントに新たに追加する`store_name`が既に存在する
-            print("insert store doc", current_doc[0])
-            set_coupon(current_doc[0].reference, pay_name, benefits)
-        elif len(current_doc) == 0:
-
+        if len(current_doc) == 0:
+            # `collection_name`コレクション内のドキュメントに新たに`store_name`を追加する．
             store_doc = db.collection(collection_name).document()
             store_doc.set({"store_name": store_name})
             print("insert store doc", store_doc)
 
             set_coupon(store_doc, pay_name, benefits)
-
+        elif (
+            len(current_doc) == 1
+        ):  # `collection_name`コレクション内のドキュメントに新たに追加する`store_name`が既に存在するため，クーポン情報を更新する．
+            print("insert store doc", current_doc[0])
+            set_coupon(current_doc[0].reference, pay_name, benefits)
         else:
             raise RuntimeError("collection内に同じstore_nameのドキュメントが複数存在している")
 
