@@ -8,7 +8,7 @@ from firebase_admin import firestore
 
 
 def set_coupon(document, pay_name, benefits):
-    coupon_doc_ref = document.collection("Payes").document()
+    coupon_doc_ref = document.collection("Pays").document()
     coupon_doc_ref.set({"pay_name": pay_name, "benefits": float(benefits[0])})
     print("insert coupon doc", coupon_doc_ref)
 
