@@ -6,6 +6,7 @@ import 'package:chimimoryo_autumn/models/store.dart';
 import 'package:chimimoryo_autumn/repository/repository.dart';
 import 'package:chimimoryo_autumn/repository/store.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
@@ -143,6 +144,23 @@ class _MyHomePageState extends State<MyHomePage> {
     return 'seven_eleven';
   }
 
+  void showUseCouponPopup(String pay) {
+    String pay_name = "";
+    if (pay == "LINE Pay") {
+      pay_name = "LINE Payクーポン";
+    } else if (pay == "PayPay") {
+      pay_name = "PayPayクーポン";
+    } else {
+      throw Exception();
+    }
+    Fluttertoast.showToast(
+        msg: "お得になるクーポンを$pay_nameからゲットしましょう！🉐", //メッセージ
+        timeInSecForIosWeb: 1, //ポップアップを出す時間
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
   Future<void> launchPay(String pay) async {
     const androidUrl = {
       "PAY_PAY": "https://www.paypay.ne.jp/app/cashier",
@@ -197,22 +215,23 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         Pay maxBenefitPay = store.pays[0];
                         num maxBenefit = store.pays[0].benefit;
-                          for (var pay in store.pays) {
-                            if (pay.benefit > maxBenefit) {
-                              maxBenefitPay = pay;
-                            }
+                        for (var pay in store.pays) {
+                          if (pay.benefit > maxBenefit) {
+                            maxBenefitPay = pay;
                           }
-                          if (maxBenefitPay.name == "LINE Pay") {
-                            launchPay("LINE_PAY");
-                          } else {
-                            launchPay("PAY_PAY");
-                          }
-                        },
-                        child: Text(store.name),
-                      );
-                    },
-                    itemCount: stores.length,
-                  );
+                        }
+                        showUseCouponPopup(maxBenefitPay.name);
+                        if (maxBenefitPay.name == "LINE Pay") {
+                          launchPay("LINE_PAY");
+                        } else {
+                          launchPay("PAY_PAY");
+                        }
+                      },
+                      child: Text(store.name),
+                    );
+                  },
+                  itemCount: stores.length,
+                );
               },
             );
           },
