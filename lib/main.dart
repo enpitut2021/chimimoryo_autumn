@@ -144,13 +144,21 @@ class _MyHomePageState extends State<MyHomePage> {
     return 'seven_eleven';
   }
 
-  void showUseCouponPopup() {
+  void showUseCouponPopup(String pay) {
+    String pay_name = "";
+    if (pay == "LINE Pay") {
+      pay_name = "LINE Payクーポン";
+    } else if (pay == "PayPay") {
+      pay_name = "PayPayクーポン";
+    } else {
+      throw Exception();
+    }
     Fluttertoast.showToast(
-      msg: "お得になるクーポンがあるので使ってください！", //メッセージ
-      timeInSecForIosWeb: 1, //ポップアップを出す時間
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0);
+        msg: "お得になるクーポンを$pay_nameからゲットしましょう！🉐", //メッセージ
+        timeInSecForIosWeb: 1, //ポップアップを出す時間
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   Future<void> launchPay(String pay) async {
@@ -212,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             maxBenefitPay = pay;
                           }
                         }
-                        showUseCouponPopup();
+                        showUseCouponPopup(maxBenefitPay.name);
                         if (maxBenefitPay.name == "LINE Pay") {
                           launchPay("LINE_PAY");
                         } else {
