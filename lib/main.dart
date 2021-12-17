@@ -185,21 +185,18 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context, snap) {
                 if (!snap.hasData) {
                   return Container();
-                if (!snap.hasData) {
-                    return Container():
+                }
                 final stores = snap.data;
-                ...
-                  final stores = snap.data;
-                  if (stores == null) {
-                    return Container();
-                  }
-                  return ListView.builder(
-                    itemBuilder: (context, index) {
-                      final store = stores[index];
-                      return ElevatedButton(
-                        onPressed: () {
-                          Pay maxBenefitPay = store.pays[0];
-                          num maxBenefit = store.pays[0].benefit;
+                if (stores == null) {
+                  return Container();
+                }
+                return ListView.builder(
+                  itemBuilder: (context, index) {
+                    final store = stores[index];
+                    return ElevatedButton(
+                      onPressed: () {
+                        Pay maxBenefitPay = store.pays[0];
+                        num maxBenefit = store.pays[0].benefit;
                           for (var pay in store.pays) {
                             if (pay.benefit > maxBenefit) {
                               maxBenefitPay = pay;
@@ -216,7 +213,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     itemCount: stores.length,
                   );
-                }
               },
             );
           },
