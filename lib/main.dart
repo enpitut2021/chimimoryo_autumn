@@ -185,7 +185,10 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context, snap) {
                 if (!snap.hasData) {
                   return Container();
-                } else {
+                if (!snap.hasData) {
+                    return Container():
+                final stores = snap.data;
+                ...
                   final stores = snap.data;
                   if (stores == null) {
                     return Container();
