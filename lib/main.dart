@@ -6,9 +6,9 @@ import 'package:chimimoryo_autumn/models/store.dart';
 import 'package:chimimoryo_autumn/repository/repository.dart';
 import 'package:chimimoryo_autumn/repository/store.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
@@ -211,8 +211,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 return ListView.builder(
                   itemBuilder: (context, index) {
                     final store = stores[index];
-                    return ElevatedButton(
-                      onPressed: () {
+                    return ListTile(
+                      onTap: () {
                         Pay maxBenefitPay = store.pays[0];
                         num maxBenefit = store.pays[0].benefit;
                         for (var pay in store.pays) {
@@ -227,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           launchPay("PAY_PAY");
                         }
                       },
-                      child: Text(store.name),
+                      title: Text(store.name),
                     );
                   },
                   itemCount: stores.length,
