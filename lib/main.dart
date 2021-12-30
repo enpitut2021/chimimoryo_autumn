@@ -93,8 +93,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getLocation();
-    // getLocationAndLaunchPay();
+    Future<Position> position = getLocation();
+    position.then((value) => print("緯度: " +
+        value.latitude.toString() +
+        "経度: " +
+        value.longitude.toString()));
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
   }
@@ -135,23 +138,33 @@ class _MyHomePageState extends State<MyHomePage> {
     "FamilyMart": {"Linepay": 2, "Paypay": 1},
   };
 
-  void getLocationAndLaunchPay() async {
-    final store = await getLocation();
-    final pay = await widget.repo.getRecommendedPay(store);
-    launchPay(pay);
-  }
+  Future<Position> getLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
 
-  Future<String> getLocation() async {
-    // TODO: GPSを用いて店の情報を取得
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again
+        return Future.error('Location permissions are denied');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-
-    print("緯度: " + position.latitude.toString());
-    // 東経がプラス、西経がマイナス
-    print("経度: " + position.longitude.toString());
-    // 高度
-    print("高度: " + position.altitude.toString());
-    return 'seven_eleven';
+    return position;
   }
 
   void showUseCouponPopup(String pay) {
