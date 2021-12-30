@@ -9,6 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
@@ -92,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    getLocation();
     // getLocationAndLaunchPay();
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
@@ -134,13 +136,21 @@ class _MyHomePageState extends State<MyHomePage> {
   };
 
   void getLocationAndLaunchPay() async {
-    final store = getLocation();
+    final store = await getLocation();
     final pay = await widget.repo.getRecommendedPay(store);
     launchPay(pay);
   }
 
-  String getLocation() {
+  Future<String> getLocation() async {
     // TODO: GPSを用いて店の情報を取得
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    print("緯度: " + position.latitude.toString());
+    // 東経がプラス、西経がマイナス
+    print("経度: " + position.longitude.toString());
+    // 高度
+    print("高度: " + position.altitude.toString());
     return 'seven_eleven';
   }
 

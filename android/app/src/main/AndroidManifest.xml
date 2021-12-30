@@ -55,6 +55,7 @@
         <meta-data
                 android:name="flutterEmbedding"
                 android:value="2"/>
+
     </application>
     <queries>
         <intent>
@@ -62,4 +63,5 @@
             <data android:scheme="https"/>
         </intent>
     </queries>
+     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 </manifest>
