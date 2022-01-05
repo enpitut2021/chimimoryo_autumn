@@ -52,3 +52,4 @@ google-services.json
 
 # Secret file for firebase
 chimimoryo-firebase-adminsdk-*.json
+secret_const.dart
