@@ -138,19 +138,12 @@ class _MyHomePageState extends State<MyHomePage> {
   };
 
   Future<List<Store>> filteredStores() async {
-    print("start get Location");
     Position position = await getLocation();
-    print("end get Location");
-    print("緯度: " +
-        position.latitude.toString() +
-        "経度: " +
-        position.longitude.toString());
     Set<String> storeListByLocation = await getStoreListByLocation(position);
     final storeRepo = StoreRepository();
     final storeListByDB = await storeRepo.getStores();
     final filteredStoreList =
         intersectionStores(storeListByLocation, storeListByDB);
-    print(filteredStoreList);
     return filteredStoreList.toList();
   }
 
