@@ -271,7 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
               future: filteredStores(),
               builder: (context, snap) {
                 if (!snap.hasData) {
-                  return Container();
+                  return CircularProgressIndicator();
                 }
                 final stores = snap.data;
                 if (stores == null) {
