@@ -96,21 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    print("start get Location");
-    Future<Position> position = getLocation();
-    print("end get Location");
-    position.then((value) async {
-      print("緯度: " +
-          value.latitude.toString() +
-          "経度: " +
-          value.longitude.toString());
-      Set<String> storeListByLocation = await getStoreListByLocation(value);
-      final storeRepo = StoreRepository();
-      final storeListByDB = await storeRepo.getStores();
-      final filteredStoreList =
-          intersectionStores(storeListByLocation, storeListByDB);
-      print(filteredStoreList);
-    });
 
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
@@ -151,6 +136,23 @@ class _MyHomePageState extends State<MyHomePage> {
     "Lawson": {"Linepay": 2, "Paypay": 1},
     "FamilyMart": {"Linepay": 2, "Paypay": 1},
   };
+
+  Future<List<Store>> filteredStores() async {
+    print("start get Location");
+    Position position = await getLocation();
+    print("end get Location");
+    print("緯度: " +
+        position.latitude.toString() +
+        "経度: " +
+        position.longitude.toString());
+    Set<String> storeListByLocation = await getStoreListByLocation(position);
+    final storeRepo = StoreRepository();
+    final storeListByDB = await storeRepo.getStores();
+    final filteredStoreList =
+        intersectionStores(storeListByLocation, storeListByDB);
+    print(filteredStoreList);
+    return filteredStoreList.toList();
+  }
 
   Future<Position> getLocation() async {
     bool serviceEnabled;
@@ -198,14 +200,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Set<Store> intersectionStores(
       Set<String> storeListByLocation, List<Store> storeListByDB) {
-    var filterdStores = [];
+    var filteredStores = [];
     storeListByLocation.forEach((storeName) {
       final store = includeDB(storeName, storeListByDB);
       if (store != null) {
-        filterdStores.add(store);
+        filteredStores.add(store);
       }
     });
-    return Set.from(filterdStores);
+    return Set.from(filteredStores);
   }
 
   Store? includeDB(String storeName, List<Store> storeListByDB) {
@@ -272,7 +274,8 @@ class _MyHomePageState extends State<MyHomePage> {
           builder: (context) {
             final storeRepo = StoreRepository();
             return FutureBuilder<List<Store>>(
-              future: storeRepo.getStores(),
+              //future: storeRepo.getStores(),
+              future: filteredStores(),
               builder: (context, snap) {
                 if (!snap.hasData) {
                   return Container();
