@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:android_intent_plus/android_intent.dart';
@@ -11,9 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
 
+import './secret_const.dart';
 import 'models/pay.dart';
 
 /// Used for Background Updates using Workmanager Plugin
@@ -93,11 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    Future<Position> position = getLocation();
-    position.then((value) => print("緯度: " +
-        value.latitude.toString() +
-        "経度: " +
-        value.longitude.toString()));
+
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
   }
@@ -138,6 +137,16 @@ class _MyHomePageState extends State<MyHomePage> {
     "FamilyMart": {"Linepay": 2, "Paypay": 1},
   };
 
+  Future<List<Store>> filteredStores() async {
+    Position position = await getLocation();
+    Set<String> storeListByLocation = await getStoreListByLocation(position);
+    final storeRepo = StoreRepository();
+    final storeListByDB = await storeRepo.getStores();
+    final filteredStoreList =
+        intersectionStores(storeListByLocation, storeListByDB);
+    return filteredStoreList.toList();
+  }
+
   Future<Position> getLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -165,6 +174,42 @@ class _MyHomePageState extends State<MyHomePage> {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     return position;
+  }
+
+  Future<Set<String>> getStoreListByLocation(Position position) async {
+    final latitude = position.latitude.toString();
+    final longitude = position.longitude.toString();
+    const dist = 3;
+    const outputType = "json";
+    const sortType = "dist";
+
+    final url = Uri.parse(
+        "https://map.yahooapis.jp/search/local/V1/localSearch?appid=${yahooApiKey}&lat=${latitude}&lon=${longitude}&dist=${dist}&output=${outputType}&sort=${sortType}");
+    final response = await http.get(url);
+    final features = jsonDecode(response.body)["Feature"];
+    Set<String> stores = Set.from(features.map((feature) => feature["Name"]));
+    return stores;
+  }
+
+  Set<Store> intersectionStores(
+      Set<String> storeListByLocation, List<Store> storeListByDB) {
+    var filteredStores = [];
+    storeListByLocation.forEach((storeName) {
+      final store = includeDB(storeName, storeListByDB);
+      if (store != null) {
+        filteredStores.add(store);
+      }
+    });
+    return Set.from(filteredStores);
+  }
+
+  Store? includeDB(String storeName, List<Store> storeListByDB) {
+    for (var store in storeListByDB) {
+      if (storeName.contains(store.name) || store.name.contains(storeName)) {
+        return store;
+      }
+    }
+    return null;
   }
 
   void showUseCouponPopup(String pay) {
@@ -222,7 +267,8 @@ class _MyHomePageState extends State<MyHomePage> {
           builder: (context) {
             final storeRepo = StoreRepository();
             return FutureBuilder<List<Store>>(
-              future: storeRepo.getStores(),
+              //future: storeRepo.getStores(),
+              future: filteredStores(),
               builder: (context, snap) {
                 if (!snap.hasData) {
                   return Container();
