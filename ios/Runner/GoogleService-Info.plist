@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>108278321847-fhvclsjqrdjupb5s6cbfksnmjo8o80i7.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.108278321847-fhvclsjqrdjupb5s6cbfksnmjo8o80i7</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBueutzm1bswRZj9_gUtNEU4An5tdKQWFQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>108278321847</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.chimimoryoAutumn</string>
+	<key>PROJECT_ID</key>
+	<string>chimimoryo</string>
+	<key>STORAGE_BUCKET</key>
+	<string>chimimoryo.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:108278321847:ios:886a23444e68f0322ab332</string>
+</dict>
+</plist>
