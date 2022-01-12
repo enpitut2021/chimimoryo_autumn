@@ -262,51 +262,59 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("近くのお店"),
+      ),
       body: Center(
-        child: Builder(
-          builder: (context) {
-            final storeRepo = StoreRepository();
-            return FutureBuilder<List<Store>>(
-              //future: storeRepo.getStores(),
-              future: filteredStores(),
-              builder: (context, snap) {
-                if (!snap.hasData) {
-                  return CircularProgressIndicator();
-                }
-                final stores = snap.data;
-                if (stores == null) {
-                  return Container();
-                }
-                if (stores.isEmpty) {
-                  return const Text("何もないよー！");
-                }
-                return ListView.builder(
-                  itemBuilder: (context, index) {
-                    final store = stores[index];
-                    return ListTile(
-                      onTap: () {
-                        Pay maxBenefitPay = store.pays[0];
-                        num maxBenefit = store.pays[0].benefit;
-                        for (var pay in store.pays) {
-                          if (pay.benefit > maxBenefit) {
-                            maxBenefitPay = pay;
-                          }
-                        }
-                        showUseCouponPopup(maxBenefitPay.name);
-                        if (maxBenefitPay.name == "LINE Pay") {
-                          launchPay("LINE_PAY");
-                        } else {
-                          launchPay("PAY_PAY");
-                        }
+        child: Column(
+          children: [
+            const Text("近くのお店"),
+            Builder(
+              builder: (context) {
+                final storeRepo = StoreRepository();
+                return FutureBuilder<List<Store>>(
+                  //future: storeRepo.getStores(),
+                  future: filteredStores(),
+                  builder: (context, snap) {
+                    if (!snap.hasData) {
+                      return CircularProgressIndicator();
+                    }
+                    final stores = snap.data;
+                    if (stores == null) {
+                      return Container();
+                    }
+                    if (stores.isEmpty) {
+                      return const Text("何もないよー！");
+                    }
+                    return ListView.builder(
+                      itemBuilder: (context, index) {
+                        final store = stores[index];
+                        return ListTile(
+                          onTap: () {
+                            Pay maxBenefitPay = store.pays[0];
+                            num maxBenefit = store.pays[0].benefit;
+                            for (var pay in store.pays) {
+                              if (pay.benefit > maxBenefit) {
+                                maxBenefitPay = pay;
+                              }
+                            }
+                            showUseCouponPopup(maxBenefitPay.name);
+                            if (maxBenefitPay.name == "LINE Pay") {
+                              launchPay("LINE_PAY");
+                            } else {
+                              launchPay("PAY_PAY");
+                            }
+                          },
+                          title: Text(store.name),
+                        );
                       },
-                      title: Text(store.name),
+                      itemCount: stores.length,
                     );
                   },
-                  itemCount: stores.length,
                 );
               },
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
