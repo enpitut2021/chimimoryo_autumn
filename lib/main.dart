@@ -277,6 +277,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (stores == null) {
                   return Container();
                 }
+                if (stores.isEmpty) {
+                  return const Text("何もないよー！");
+                }
                 return ListView.builder(
                   itemBuilder: (context, index) {
                     final store = stores[index];
