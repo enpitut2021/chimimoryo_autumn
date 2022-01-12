@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:home_widget/home_widget.dart';
+// import 'package:home_widget/home_widget.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
@@ -21,25 +21,25 @@ import 'models/pay.dart';
 
 /// Used for Background Updates using Workmanager Plugin
 void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) {
-    final now = DateTime.now();
-    return Future.wait<bool?>([
-      HomeWidget.saveWidgetData(
-        'title',
-        'Updated from Background',
-      ),
-      HomeWidget.saveWidgetData(
-        'message',
-        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-      ),
-      HomeWidget.updateWidget(
-        name: 'HomeWidgetExampleProvider',
-        iOSName: 'HomeWidgetExample',
-      ),
-    ]).then((value) {
-      return !value.contains(false);
-    });
-  });
+  // Workmanager().executeTask((taskName, inputData) {
+  //   final now = DateTime.now();
+  //   // return Future.wait<bool?>([
+  //   //   HomeWidget.saveWidgetData(
+  //   //     'title',
+  //   //     'Updated from Background',
+  //   //   ),
+  //   //   HomeWidget.saveWidgetData(
+  //   //     'message',
+  //   //     '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+  //   //   ),
+  //   //   HomeWidget.updateWidget(
+  //   //     name: 'HomeWidgetExampleProvider',
+  //   //     iOSName: 'HomeWidgetExample',
+  //   //   ),
+  //   // ]).then((value) {
+  //   //   return !value.contains(false);
+  //   // });
+  // });
 }
 
 /// Called when Doing Background Work initiated from Widget
@@ -47,9 +47,9 @@ void backgroundCallback(Uri? data) async {
   if (data!.host == 'titleclicked') {
     const greetings = 'こんにちは';
 
-    await HomeWidget.saveWidgetData<String>('title', greetings);
-    await HomeWidget.updateWidget(
-        name: 'HomeWidgetExampleProvider', iOSName: 'HomeWidgetExample');
+    // await HomeWidget.saveWidgetData<String>('title', greetings);
+    // await HomeWidget.updateWidget(
+    //     name: 'HomeWidgetExampleProvider', iOSName: 'HomeWidgetExample');
   }
 }
 
@@ -97,15 +97,15 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    HomeWidget.setAppGroupId('YOUR_GROUP_ID');
-    HomeWidget.registerBackgroundCallback(backgroundCallback);
+    // HomeWidget.setAppGroupId('YOUR_GROUP_ID');
+    // HomeWidget.registerBackgroundCallback(backgroundCallback);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _checkForWidgetLaunch();
-    HomeWidget.widgetClicked.listen(_launchedFromWidget);
+    // HomeWidget.widgetClicked.listen(_launchedFromWidget);
   }
 
   @override
@@ -116,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _checkForWidgetLaunch() {
-    HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
+    // HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
   }
 
   /// For PBI「おまけ：ウィジェット起動時とアプリ起動時で異なる動きができるかを調査」 in PBI4
@@ -186,6 +186,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final url = Uri.parse(
         "https://map.yahooapis.jp/search/local/V1/localSearch?appid=${yahooApiKey}&lat=${latitude}&lon=${longitude}&dist=${dist}&output=${outputType}&sort=${sortType}");
     final response = await http.get(url);
+    final Map<String, dynamic> jsonContent = jsonDecode(response.body);
+    if (!jsonContent.containsKey("Feature")) {
+      return <String>{};
+    }
     final features = jsonDecode(response.body)["Feature"];
     Set<String> stores = Set.from(features.map((feature) => feature["Name"]));
     return stores;
@@ -194,12 +198,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Set<Store> intersectionStores(
       Set<String> storeListByLocation, List<Store> storeListByDB) {
     var filteredStores = [];
-    storeListByLocation.forEach((storeName) {
+    for (var storeName in storeListByLocation) {
       final store = includeDB(storeName, storeListByDB);
       if (store != null) {
         filteredStores.add(store);
       }
-    });
+    }
     return Set.from(filteredStores);
   }
 
@@ -277,6 +281,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (stores == null) {
                   return Container();
                 }
+
+                if (stores.isEmpty) {
+                  return const Text("なにもないよー！");
+                }
+
                 return ListView.builder(
                   itemBuilder: (context, index) {
                     final store = stores[index];
