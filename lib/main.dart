@@ -265,10 +265,9 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text("近くのお店"),
       ),
-      body: Center(
+      body: SafeArea(
         child: Column(
           children: [
-            const Text("近くのお店"),
             Builder(
               builder: (context) {
                 final storeRepo = StoreRepository();
@@ -277,16 +276,24 @@ class _MyHomePageState extends State<MyHomePage> {
                   future: filteredStores(),
                   builder: (context, snap) {
                     if (!snap.hasData) {
-                      return CircularProgressIndicator();
+                      return const Padding(
+                          child: Center(child: CircularProgressIndicator()),
+                          padding: EdgeInsets.all(15));
                     }
                     final stores = snap.data;
                     if (stores == null) {
                       return Container();
                     }
                     if (stores.isEmpty) {
-                      return const Text("何もないよー！");
+                      return const Padding(
+                          child: Text("見つかりませんでした...",
+                              style: TextStyle(
+                                fontSize: 20,
+                              )),
+                          padding: EdgeInsets.all(15));
                     }
                     return ListView.builder(
+                      shrinkWrap: true,
                       itemBuilder: (context, index) {
                         final store = stores[index];
                         return ListTile(
