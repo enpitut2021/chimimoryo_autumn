@@ -262,51 +262,66 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Builder(
-          builder: (context) {
-            final storeRepo = StoreRepository();
-            return FutureBuilder<List<Store>>(
-              //future: storeRepo.getStores(),
-              future: filteredStores(),
-              builder: (context, snap) {
-                if (!snap.hasData) {
-                  return CircularProgressIndicator();
-                }
-                final stores = snap.data;
-                if (stores == null) {
-                  return Container();
-                }
-                if (stores.isEmpty) {
-                  return const Text("何もないよー！");
-                }
-                return ListView.builder(
-                  itemBuilder: (context, index) {
-                    final store = stores[index];
-                    return ListTile(
-                      onTap: () {
-                        Pay maxBenefitPay = store.pays[0];
-                        num maxBenefit = store.pays[0].benefit;
-                        for (var pay in store.pays) {
-                          if (pay.benefit > maxBenefit) {
-                            maxBenefitPay = pay;
-                          }
-                        }
-                        showUseCouponPopup(maxBenefitPay.name);
-                        if (maxBenefitPay.name == "LINE Pay") {
-                          launchPay("LINE_PAY");
-                        } else {
-                          launchPay("PAY_PAY");
-                        }
+      appBar: AppBar(
+        title: const Text("近くのお店"),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Builder(
+              builder: (context) {
+                final storeRepo = StoreRepository();
+                return FutureBuilder<List<Store>>(
+                  //future: storeRepo.getStores(),
+                  future: filteredStores(),
+                  builder: (context, snap) {
+                    if (!snap.hasData) {
+                      return const Padding(
+                          child: Center(child: CircularProgressIndicator()),
+                          padding: EdgeInsets.all(15));
+                    }
+                    final stores = snap.data;
+                    if (stores == null) {
+                      return Container();
+                    }
+                    if (stores.isEmpty) {
+                      return const Padding(
+                          child: Text("見つかりませんでした...",
+                              style: TextStyle(
+                                fontSize: 20,
+                              )),
+                          padding: EdgeInsets.all(15));
+                    }
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final store = stores[index];
+                        return ListTile(
+                          onTap: () {
+                            Pay maxBenefitPay = store.pays[0];
+                            num maxBenefit = store.pays[0].benefit;
+                            for (var pay in store.pays) {
+                              if (pay.benefit > maxBenefit) {
+                                maxBenefitPay = pay;
+                              }
+                            }
+                            showUseCouponPopup(maxBenefitPay.name);
+                            if (maxBenefitPay.name == "LINE Pay") {
+                              launchPay("LINE_PAY");
+                            } else {
+                              launchPay("PAY_PAY");
+                            }
+                          },
+                          title: Text(store.name),
+                        );
                       },
-                      title: Text(store.name),
+                      itemCount: stores.length,
                     );
                   },
-                  itemCount: stores.length,
                 );
               },
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
