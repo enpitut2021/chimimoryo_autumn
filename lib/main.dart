@@ -186,7 +186,15 @@ class _MyHomePageState extends State<MyHomePage> {
     final url = Uri.parse(
         "https://map.yahooapis.jp/search/local/V1/localSearch?appid=${yahooApiKey}&lat=${latitude}&lon=${longitude}&dist=${dist}&output=${outputType}&sort=${sortType}");
     final response = await http.get(url);
-    final features = jsonDecode(response.body)["Feature"];
+
+    final Map<String, dynamic> jsonData = jsonDecode(response.body);
+
+    // 空の場合 Feature プロパティが存在しないので、空のSetを返す
+    if (!jsonData.keys.contains("Feature")) {
+      return {}; // Dartで {} は空のSetを表す
+    }
+
+    final features = jsonData["Feature"];
     Set<String> stores = Set.from(features.map((feature) => feature["Name"]));
     return stores;
   }
