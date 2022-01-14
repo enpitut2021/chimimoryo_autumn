@@ -106,6 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future _init() async {
+    setState(() {
+      _storeList = null;
+    });
     final storeList = await filteredStores();
     setState(() {
       _storeList = storeList;
@@ -283,6 +286,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("近くのお店"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _init();
+            },
+            icon: const Icon(Icons.refresh, size: 30),
+          )
+        ],
       ),
       body: SafeArea(
         child: Column(
