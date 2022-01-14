@@ -102,10 +102,10 @@ class _MyHomePageState extends State<MyHomePage> {
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
 
-    _init();
+    _refreshStoreList();
   }
 
-  Future _init() async {
+  Future _refreshStoreList() async {
     setState(() {
       _storeList = null;
     });
@@ -289,7 +289,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             onPressed: () {
-              _init();
+              _refreshStoreList();
             },
             icon: const Icon(Icons.refresh, size: 30),
           )
