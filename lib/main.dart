@@ -102,10 +102,13 @@ class _MyHomePageState extends State<MyHomePage> {
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
 
-    _init();
+    _refreshStoreList();
   }
 
-  Future _init() async {
+  Future _refreshStoreList() async {
+    setState(() {
+      _storeList = null;
+    });
     final storeList = await filteredStores();
     setState(() {
       _storeList = storeList;
@@ -283,6 +286,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("近くのお店"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _refreshStoreList();
+            },
+            icon: const Icon(Icons.refresh, size: 30),
+          )
+        ],
       ),
       body: SafeArea(
         child: Column(
