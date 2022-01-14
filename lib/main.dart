@@ -11,51 +11,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:workmanager/workmanager.dart';
 
 import './secret_const.dart';
 import 'models/pay.dart';
 
-/// Used for Background Updates using Workmanager Plugin
-void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) {
-    final now = DateTime.now();
-    return Future.wait<bool?>([
-      HomeWidget.saveWidgetData(
-        'title',
-        'Updated from Background',
-      ),
-      HomeWidget.saveWidgetData(
-        'message',
-        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-      ),
-      HomeWidget.updateWidget(
-        name: 'HomeWidgetExampleProvider',
-        iOSName: 'HomeWidgetExample',
-      ),
-    ]).then((value) {
-      return !value.contains(false);
-    });
-  });
-}
-
-/// Called when Doing Background Work initiated from Widget
-void backgroundCallback(Uri? data) async {
-  if (data!.host == 'titleclicked') {
-    const greetings = 'こんにちは';
-
-    await HomeWidget.saveWidgetData<String>('title', greetings);
-    await HomeWidget.updateWidget(
-        name: 'HomeWidgetExampleProvider', iOSName: 'HomeWidgetExample');
-  }
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
   await Firebase.initializeApp();
   runApp(const MyApp());
 }
@@ -99,9 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    HomeWidget.setAppGroupId('YOUR_GROUP_ID');
-    HomeWidget.registerBackgroundCallback(backgroundCallback);
-
     _refreshStoreList();
   }
 
@@ -116,33 +76,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkForWidgetLaunch();
-    HomeWidget.widgetClicked.listen(_launchedFromWidget);
-  }
-
-  @override
   void dispose() {
     _titleController.dispose();
     _messageController.dispose();
     super.dispose();
-  }
-
-  void _checkForWidgetLaunch() {
-    HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
-  }
-
-  /// For PBI「おまけ：ウィジェット起動時とアプリ起動時で異なる動きができるかを調査」 in PBI4
-  void _launchedFromWidget(Uri? uri) {
-    if (uri != null) {
-      showDialog(
-          context: context,
-          builder: (buildContext) => AlertDialog(
-                title: Text('App started from HomeScreenWidget'),
-                content: Text('Here is the URI: $uri'),
-              ));
-    }
   }
 
   final valueRate = {
