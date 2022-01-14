@@ -92,6 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
+  List<Store>? _storeList;
+
   // 将来ウィジェットにおける操作から何かを反映したい時用
   @override
   void initState() {
@@ -99,6 +101,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     HomeWidget.setAppGroupId('YOUR_GROUP_ID');
     HomeWidget.registerBackgroundCallback(backgroundCallback);
+
+    _init();
+  }
+
+  Future _init() async {
+    final storeList = await filteredStores();
+    setState(() {
+      _storeList = storeList;
+    });
   }
 
   @override
@@ -274,92 +285,61 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text("近くのお店"),
       ),
       body: SafeArea(
-          child: Column(children: [
-        Builder(
-          builder: (context) {
-            final storeRepo = StoreRepository();
-            return FutureBuilder<List<Store>>(
-              //future: storeRepo.getStores(),
-              future: filteredStores(),
-              builder: (context, snap) {
-                if (!snap.hasData) {
-                  return const Padding(
-                      child: Center(child: CircularProgressIndicator()),
-                      padding: EdgeInsets.all(15));
-                }
-                final stores = snap.data;
-                if (stores == null) {
-                  return Container();
-                }
-                if (stores.isEmpty) {
-                  return const Padding(
-                      child: Text("見つかりませんでした...",
-                          style: TextStyle(
-                            fontSize: 20,
-                          )),
-                      padding: EdgeInsets.all(15));
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    final store = stores[index];
-                    return ListTile(
-                      onTap: () {
-                        Pay maxBenefitPay = store.pays[0];
-                        num maxBenefit = store.pays[0].benefit;
-                        for (var pay in store.pays) {
-                          if (pay.benefit > maxBenefit) {
-                            maxBenefitPay = pay;
-                          }
-                        }
-                        showUseCouponPopup(maxBenefitPay.name);
-                        if (maxBenefitPay.name == "LINE Pay") {
-                          launchPay("LINE_PAY");
-                        } else {
-                          launchPay("PAY_PAY");
-                        }
-                      },
-                      title: Text(store.name),
-                    );
-                  },
-                  itemCount: stores.length,
+        child: Column(
+          children: [
+            Builder(builder: (context) {
+              if (_storeList == null) {
+                return const Padding(
+                  child: Center(child: CircularProgressIndicator()),
+                  padding: EdgeInsets.all(15),
                 );
-              },
-            );
-          },
-        ),
-        Spacer(),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 32.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(
-                  width: 100,
-                  height: 50,
-                  child: ElevatedButton(
-                      child: const Text("Line Pay"),
-                      onPressed: () {
+              }
+
+              if (_storeList!.isEmpty) {
+                return const Padding(
+                  child: Text(
+                    "見つかりませんでした...",
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  padding: EdgeInsets.all(15),
+                );
+              }
+
+              return ListView.builder(
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  final storeList = _storeList;
+                  if (storeList == null) {
+                    return Container();
+                  }
+                  final store = storeList[index];
+                  return ListTile(
+                    onTap: () {
+                      Pay maxBenefitPay = store.pays[0];
+                      num maxBenefit = store.pays[0].benefit;
+                      for (var pay in store.pays) {
+                        if (pay.benefit > maxBenefit) {
+                          maxBenefitPay = pay;
+                        }
+                      }
+                      showUseCouponPopup(maxBenefitPay.name);
+                      if (maxBenefitPay.name == "LINE Pay") {
                         launchPay("LINE_PAY");
-                      },
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Color(0xff08bf5b))))),
-              SizedBox(
-                  width: 100,
-                  height: 50,
-                  child: ElevatedButton(
-                      child: const Text("PayPay"),
-                      onPressed: () {
+                      } else {
                         launchPay("PAY_PAY");
-                      },
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Color(0xfff24f4f)))))
-            ],
-          ),
+                      }
+                    },
+                    title: Text(store.name),
+                  );
+                },
+                itemCount: _storeList?.length ?? 0,
+              );
+            }),
+          ],
         ),
-      ])),
+      ),
     );
   }
 }
