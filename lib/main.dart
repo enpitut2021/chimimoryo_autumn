@@ -152,13 +152,20 @@ class _MyHomePageState extends State<MyHomePage> {
   };
 
   Future<List<Store>> filteredStores() async {
-    Position position = await getLocation();
-    Set<String> storeListByLocation = await getStoreListByLocation(position);
     final storeRepo = StoreRepository();
-    final storeListByDB = await storeRepo.getStores();
+    final futureResults = await Future.wait<dynamic>(
+        [getLocationAndStoreList(), storeRepo.getStores()]);
+    final Set<String> storeListByLocation = futureResults[0];
+    final List<Store> storeListByDB = futureResults[1];
     final filteredStoreList =
         intersectionStores(storeListByLocation, storeListByDB);
     return filteredStoreList.toList();
+  }
+
+  Future<Set<String>> getLocationAndStoreList() async {
+    Position position = await getLocation();
+    Set<String> storeListByLocation = await getStoreListByLocation(position);
+    return storeListByLocation;
   }
 
   Future<Position> getLocation() async {
@@ -228,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Store? includeDB(String storeName, List<Store> storeListByDB) {
     for (var store in storeListByDB) {
       if (storeName.contains(store.name) || store.name.contains(storeName)) {
-        return store;
+        return Store(name: storeName, pays: store.pays);
       }
     }
     return null;
