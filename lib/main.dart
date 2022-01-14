@@ -337,6 +337,37 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: _storeList?.length ?? 0,
               );
             }),
+            Spacer(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 32.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SizedBox(
+                      width: 100,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("Line Pay"),
+                          onPressed: () {
+                            launchPay("LINE_PAY");
+                          },
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Color(0xff08bf5b))))),
+                  SizedBox(
+                      width: 100,
+                      height: 50,
+                      child: ElevatedButton(
+                          child: const Text("PayPay"),
+                          onPressed: () {
+                            launchPay("PAY_PAY");
+                          },
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Color(0xfff24f4f)))))
+                ],
+              ),
+            ),
           ],
         ),
       ),
