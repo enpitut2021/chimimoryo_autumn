@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
+import 'dart:math';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:chimimoryo_autumn/models/store.dart';
@@ -92,16 +93,16 @@ class _MyHomePageState extends State<MyHomePage> {
     final storeRepo = StoreRepository();
     final futureResults = await Future.wait<dynamic>(
         [getLocationAndStoreList(), storeRepo.getStores()]);
-    final Set<String> storeListByLocation = futureResults[0];
+    final Set<Store> storeListByLocation = futureResults[0];
     final List<Store> storeListByDB = futureResults[1];
     final filteredStoreList =
         intersectionStores(storeListByLocation, storeListByDB);
     return filteredStoreList.toList();
   }
 
-  Future<Set<String>> getLocationAndStoreList() async {
+  Future<Set<Store>> getLocationAndStoreList() async {
     Position position = await getLocation();
-    Set<String> storeListByLocation = await getStoreListByLocation(position);
+    Set<Store> storeListByLocation = await getStoreListByLocation(position);
     return storeListByLocation;
   }
 
@@ -134,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return position;
   }
 
-  Future<Set<String>> getStoreListByLocation(Position position) async {
+  Future<Set<Store>> getStoreListByLocation(Position position) async {
     final latitude = position.latitude.toString();
     final longitude = position.longitude.toString();
     const dist = 3;
@@ -153,15 +154,44 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     final features = jsonData["Feature"];
-    Set<String> stores = Set.from(features.map((feature) => feature["Name"]));
+    Set<Store> stores = Set.from(features.map((feature) => Store(
+        name: feature["Name"],
+        pays: [],
+        distance: calcDistance(
+            feature["Geometry"]["Coordinates"], latitude, longitude))));
     return stores;
   }
 
+  double calcDistance(String storePosition, String latitude, String longitude) {
+    final nowLat = double.parse(latitude);
+    final nowLon = double.parse(longitude);
+    List<String> latAndLon = storePosition.split(",");
+    final storeLon = double.parse(latAndLon[0]);
+    final storeLat = double.parse(latAndLon[1]);
+
+    const earthRadius = 6378137.0;
+    final radNowLat = toRadians(nowLat);
+    final radStoreLat = toRadians(storeLat);
+    final radNowLon = toRadians(nowLon);
+    final radStoreLon = toRadians(storeLon);
+    final a = pow(sin((radNowLat - radStoreLat) / 2), 2);
+    final b = cos(radStoreLat) *
+        cos(radNowLat) *
+        pow(sin((radNowLon - radStoreLon) / 2), 2);
+    final distance = 2 * earthRadius * asin(sqrt(a + b));
+    return distance;
+  }
+
+  double toRadians(double degree) {
+    const double pi = 3.1415926535897932;
+    return degree * pi / 180;
+  }
+
   Set<Store> intersectionStores(
-      Set<String> storeListByLocation, List<Store> storeListByDB) {
+      Set<Store> storeListByLocation, List<Store> storeListByDB) {
     var filteredStores = [];
-    storeListByLocation.forEach((storeName) {
-      final store = includeDB(storeName, storeListByDB);
+    storeListByLocation.forEach((nearStore) {
+      final store = includeDB(nearStore, storeListByDB);
       if (store != null) {
         filteredStores.add(store);
       }
@@ -169,10 +199,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Set.from(filteredStores);
   }
 
-  Store? includeDB(String storeName, List<Store> storeListByDB) {
-    for (var store in storeListByDB) {
-      if (storeName.contains(store.name) || store.name.contains(storeName)) {
-        return Store(name: storeName, pays: store.pays);
+  Store? includeDB(Store store, List<Store> storeListByDB) {
+    for (var dbStore in storeListByDB) {
+      if (store.name.contains(dbStore.name) ||
+          dbStore.name.contains(store.name)) {
+        return Store(
+            name: store.name, pays: store.pays, distance: store.distance);
       }
     }
     return null;
