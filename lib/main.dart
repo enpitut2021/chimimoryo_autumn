@@ -216,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (store.name.contains(dbStore.name) ||
           dbStore.name.contains(store.name)) {
         return Store(
-            name: store.name, pays: store.pays, distance: store.distance);
+            name: store.name, pays: dbStore.pays, distance: store.distance);
       }
     }
     return null;
@@ -314,24 +314,70 @@ class _MyHomePageState extends State<MyHomePage> {
                     return Container();
                   }
                   final store = storeList[index];
-                  return ListTile(
-                    onTap: () {
-                      Pay maxBenefitPay = store.pays[0];
-                      num maxBenefit = store.pays[0].benefit;
-                      for (var pay in store.pays) {
-                        if (pay.benefit > maxBenefit) {
-                          maxBenefitPay = pay;
-                        }
-                      }
-                      showUseCouponPopup(maxBenefitPay.name);
-                      if (maxBenefitPay.name == "LINE Pay") {
-                        launchPay("LINE_PAY");
-                      } else {
-                        launchPay("PAY_PAY");
-                      }
-                    },
-                    title: Text(store.name),
-                  );
+                  if (store.pays.isEmpty) {
+                    return Container();
+                  }
+                  Pay maxBenefitPay = store.pays[0];
+                  num maxBenefit = store.pays[0].benefit;
+                  for (var pay in store.pays) {
+                    if (pay.benefit > maxBenefit) {
+                      maxBenefitPay = pay;
+                    }
+                  }
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: Card(
+                        child: InkWell(
+                          onTap: () {
+                            showUseCouponPopup(maxBenefitPay.name);
+                            if (maxBenefitPay.name == "LINE Pay") {
+                              launchPay("LINE_PAY");
+                            } else {
+                              launchPay("PAY_PAY");
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                Expanded(
+                                    child: ListTile(
+                                  title: Text(store.name),
+                                  subtitle: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        const Icon(
+                                          Icons.place,
+                                          color: Colors.grey,
+                                          size: 18,
+                                        ),
+                                        Text(
+                                            "${store.distance?.toStringAsFixed(0)} m")
+                                      ]),
+                                )),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Text(
+                                      maxBenefitPay.name,
+                                      style: TextStyle(
+                                        color:
+                                            (maxBenefitPay.name == "LINE Pay")
+                                                ? const Color(0xff08bf5b)
+                                                : const Color(0xfff24f4f),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ));
                 },
                 itemCount: _storeList?.length ?? 0,
               );
