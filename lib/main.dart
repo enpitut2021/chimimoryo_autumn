@@ -216,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (store.name.contains(dbStore.name) ||
           dbStore.name.contains(store.name)) {
         return Store(
-            name: store.name, pays: store.pays, distance: store.distance);
+            name: store.name, pays: dbStore.pays, distance: store.distance);
       }
     }
     return null;
@@ -314,6 +314,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     return Container();
                   }
                   final store = storeList[index];
+                  if (store.pays.isEmpty) {
+                    return Container();
+                  }
                   Pay maxBenefitPay = store.pays[0];
                   num maxBenefit = store.pays[0].benefit;
                   for (var pay in store.pays) {
@@ -341,7 +344,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Expanded(
                                     child: ListTile(
                                   title: Text(store.name),
-                                  subtitle: Text('50m'),
+                                  subtitle: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        const Icon(
+                                          Icons.place,
+                                          color: Colors.grey,
+                                          size: 18,
+                                        ),
+                                        Text(
+                                            "${store.distance?.toStringAsFixed(0)} m")
+                                      ]),
                                 )),
                                 Align(
                                   alignment: Alignment.centerRight,
