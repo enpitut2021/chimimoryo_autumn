@@ -343,39 +343,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        OutlinedButton(
+                        LaunchPayButton(
                           onPressed: () {
                             launchPay("LINE_PAY");
                           },
-                          child: const Text(
-                            "LINE Pay",
-                            style: TextStyle(
-                              color: Color(0xff08bf5b),
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: Color(0xff08bf5b),
-                              width: 2,
-                            ),
-                          ),
+                          payService: PayService.linepay,
                         ),
-                        OutlinedButton(
+                        LaunchPayButton(
                           onPressed: () {
                             launchPay("PAY_PAY");
                           },
-                          child: const Text(
-                            "PayPay",
-                            style: TextStyle(
-                              color: Color(0xfff24f4f),
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: Color(0xfff24f4f),
-                              width: 2,
-                            ),
-                          ),
+                          payService: PayService.paypay,
                         ),
                       ],
                     ),
@@ -394,6 +372,62 @@ class _MyHomePageState extends State<MyHomePage> {
             // ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+enum PayService {
+  paypay,
+  linepay,
+}
+
+class LaunchPayButton extends StatelessWidget {
+  final void Function() onPressed;
+  final PayService payService;
+
+  String get payServiceText {
+    if (payService == PayService.linepay) {
+      return "LINE Pay";
+    } else if (payService == PayService.paypay) {
+      return "Pay Pay";
+    } else {
+      return "不明なPay";
+    }
+  }
+
+  Color get payServiceColor {
+    if (payService == PayService.linepay) {
+      return const Color(0xff08bf5b);
+    } else if (payService == PayService.paypay) {
+      return const Color(0xfff24f4f);
+    } else {
+      return Colors.red;
+    }
+  }
+
+  const LaunchPayButton({
+    Key? key,
+    required this.onPressed,
+    required this.payService,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      child: Text(
+        payServiceText,
+        style: TextStyle(
+          color: payServiceColor,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(
+          color: payServiceColor,
+          width: 2,
+        ),
+        fixedSize: const Size(130, 48),
       ),
     );
   }
