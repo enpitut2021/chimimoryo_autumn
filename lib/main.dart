@@ -9,6 +9,7 @@ import 'package:chimimoryo_autumn/repository/store.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +24,8 @@ void main() async {
   runApp(const MyApp());
 }
 
+const locale = Locale("ja", "JP");
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -35,6 +38,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
+      locale: locale,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        locale,
+      ],
     );
   }
 }
@@ -294,37 +306,128 @@ class _MyHomePageState extends State<MyHomePage> {
             }),
             Spacer(),
             Padding(
-              padding: const EdgeInsets.only(bottom: 32.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: ElevatedButton(
-                          child: const Text("Line Pay"),
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.info,
+                          size: 30,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 6, height: 0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "今いるお店がみつかりませんか？",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            Text(
+                              "下のボタンから直接Payを開けます",
+                              style: TextStyle(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 24, width: 0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        LaunchPayButton(
                           onPressed: () {
                             launchPay("LINE_PAY");
                           },
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color(0xff08bf5b))))),
-                  SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: ElevatedButton(
-                          child: const Text("PayPay"),
+                          payService: PayService.linepay,
+                        ),
+                        LaunchPayButton(
                           onPressed: () {
                             launchPay("PAY_PAY");
                           },
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color(0xfff24f4f)))))
-                ],
+                          payService: PayService.paypay,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(12),
               ),
             ),
+            // Padding(
+            //   padding: const EdgeInsets.only(bottom: 32.0),
+            //   child:
+            // ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+enum PayService {
+  paypay,
+  linepay,
+}
+
+class LaunchPayButton extends StatelessWidget {
+  final void Function() onPressed;
+  final PayService payService;
+
+  String get payServiceText {
+    if (payService == PayService.linepay) {
+      return "LINE Pay";
+    } else if (payService == PayService.paypay) {
+      return "Pay Pay";
+    } else {
+      return "不明なPay";
+    }
+  }
+
+  Color get payServiceColor {
+    if (payService == PayService.linepay) {
+      return const Color(0xff08bf5b);
+    } else if (payService == PayService.paypay) {
+      return const Color(0xfff24f4f);
+    } else {
+      return Colors.red;
+    }
+  }
+
+  const LaunchPayButton({
+    Key? key,
+    required this.onPressed,
+    required this.payService,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      child: Text(
+        payServiceText,
+        style: TextStyle(
+          color: payServiceColor,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(
+          color: payServiceColor,
+          width: 2,
+        ),
+        fixedSize: const Size(130, 48),
       ),
     );
   }
