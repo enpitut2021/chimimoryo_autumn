@@ -294,35 +294,92 @@ class _MyHomePageState extends State<MyHomePage> {
             }),
             Spacer(),
             Padding(
-              padding: const EdgeInsets.only(bottom: 32.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: ElevatedButton(
-                          child: const Text("Line Pay"),
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.info,
+                          size: 30,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 6, height: 0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "今いるお店がみつかりませんか？",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            Text(
+                              "下のボタンから直接Payを開けます",
+                              style: TextStyle(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 24, width: 0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        OutlinedButton(
                           onPressed: () {
                             launchPay("LINE_PAY");
                           },
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color(0xff08bf5b))))),
-                  SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: ElevatedButton(
-                          child: const Text("PayPay"),
+                          child: const Text(
+                            "LINE Pay",
+                            style: TextStyle(
+                              color: Color(0xff08bf5b),
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                              color: Color(0xff08bf5b),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        OutlinedButton(
                           onPressed: () {
                             launchPay("PAY_PAY");
                           },
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color(0xfff24f4f)))))
-                ],
+                          child: const Text(
+                            "PayPay",
+                            style: TextStyle(
+                              color: Color(0xfff24f4f),
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                              color: Color(0xfff24f4f),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(12),
               ),
             ),
+            // Padding(
+            //   padding: const EdgeInsets.only(bottom: 32.0),
+            //   child:
+            // ),
           ],
         ),
       ),
