@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
+import 'dart:math';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:chimimoryo_autumn/models/store.dart';
@@ -9,6 +10,7 @@ import 'package:chimimoryo_autumn/repository/store.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +25,8 @@ void main() async {
   runApp(const MyApp());
 }
 
+const locale = Locale("ja", "JP");
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -35,6 +39,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
+      locale: locale,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        locale,
+      ],
     );
   }
 }
@@ -92,16 +105,16 @@ class _MyHomePageState extends State<MyHomePage> {
     final storeRepo = StoreRepository();
     final futureResults = await Future.wait<dynamic>(
         [getLocationAndStoreList(), storeRepo.getStores()]);
-    final Set<String> storeListByLocation = futureResults[0];
+    final Set<Store> storeListByLocation = futureResults[0];
     final List<Store> storeListByDB = futureResults[1];
     final filteredStoreList =
         intersectionStores(storeListByLocation, storeListByDB);
     return filteredStoreList.toList();
   }
 
-  Future<Set<String>> getLocationAndStoreList() async {
+  Future<Set<Store>> getLocationAndStoreList() async {
     Position position = await getLocation();
-    Set<String> storeListByLocation = await getStoreListByLocation(position);
+    Set<Store> storeListByLocation = await getStoreListByLocation(position);
     return storeListByLocation;
   }
 
@@ -134,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return position;
   }
 
-  Future<Set<String>> getStoreListByLocation(Position position) async {
+  Future<Set<Store>> getStoreListByLocation(Position position) async {
     final latitude = position.latitude.toString();
     final longitude = position.longitude.toString();
     const dist = 3;
@@ -153,15 +166,44 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     final features = jsonData["Feature"];
-    Set<String> stores = Set.from(features.map((feature) => feature["Name"]));
+    Set<Store> stores = Set.from(features.map((feature) => Store(
+        name: feature["Name"],
+        pays: [],
+        distance: calcDistance(
+            feature["Geometry"]["Coordinates"], latitude, longitude))));
     return stores;
   }
 
+  double calcDistance(String storePosition, String latitude, String longitude) {
+    final nowLat = double.parse(latitude);
+    final nowLon = double.parse(longitude);
+    List<String> latAndLon = storePosition.split(",");
+    final storeLon = double.parse(latAndLon[0]);
+    final storeLat = double.parse(latAndLon[1]);
+
+    const earthRadius = 6378137.0;
+    final radNowLat = toRadians(nowLat);
+    final radStoreLat = toRadians(storeLat);
+    final radNowLon = toRadians(nowLon);
+    final radStoreLon = toRadians(storeLon);
+    final a = pow(sin((radNowLat - radStoreLat) / 2), 2);
+    final b = cos(radStoreLat) *
+        cos(radNowLat) *
+        pow(sin((radNowLon - radStoreLon) / 2), 2);
+    final distance = 2 * earthRadius * asin(sqrt(a + b));
+    return distance;
+  }
+
+  double toRadians(double degree) {
+    const double pi = 3.1415926535897932;
+    return degree * pi / 180;
+  }
+
   Set<Store> intersectionStores(
-      Set<String> storeListByLocation, List<Store> storeListByDB) {
+      Set<Store> storeListByLocation, List<Store> storeListByDB) {
     var filteredStores = [];
-    storeListByLocation.forEach((storeName) {
-      final store = includeDB(storeName, storeListByDB);
+    storeListByLocation.forEach((nearStore) {
+      final store = includeDB(nearStore, storeListByDB);
       if (store != null) {
         filteredStores.add(store);
       }
@@ -169,10 +211,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Set.from(filteredStores);
   }
 
-  Store? includeDB(String storeName, List<Store> storeListByDB) {
-    for (var store in storeListByDB) {
-      if (storeName.contains(store.name) || store.name.contains(storeName)) {
-        return Store(name: storeName, pays: store.pays);
+  Store? includeDB(Store store, List<Store> storeListByDB) {
+    for (var dbStore in storeListByDB) {
+      if (store.name.contains(dbStore.name) ||
+          dbStore.name.contains(store.name)) {
+        return Store(
+            name: store.name, pays: store.pays, distance: store.distance);
       }
     }
     return null;
@@ -326,37 +370,128 @@ class _MyHomePageState extends State<MyHomePage> {
             }),
             Spacer(),
             Padding(
-              padding: const EdgeInsets.only(bottom: 32.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: ElevatedButton(
-                          child: const Text("Line Pay"),
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.info,
+                          size: 30,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 6, height: 0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "今いるお店がみつかりませんか？",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            Text(
+                              "下のボタンから直接Payを開けます",
+                              style: TextStyle(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 24, width: 0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        LaunchPayButton(
                           onPressed: () {
                             launchPay("LINE_PAY");
                           },
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color(0xff08bf5b))))),
-                  SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: ElevatedButton(
-                          child: const Text("PayPay"),
+                          payService: PayService.linepay,
+                        ),
+                        LaunchPayButton(
                           onPressed: () {
                             launchPay("PAY_PAY");
                           },
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color(0xfff24f4f)))))
-                ],
+                          payService: PayService.paypay,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(12),
               ),
             ),
+            // Padding(
+            //   padding: const EdgeInsets.only(bottom: 32.0),
+            //   child:
+            // ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+enum PayService {
+  paypay,
+  linepay,
+}
+
+class LaunchPayButton extends StatelessWidget {
+  final void Function() onPressed;
+  final PayService payService;
+
+  String get payServiceText {
+    if (payService == PayService.linepay) {
+      return "LINE Pay";
+    } else if (payService == PayService.paypay) {
+      return "Pay Pay";
+    } else {
+      return "不明なPay";
+    }
+  }
+
+  Color get payServiceColor {
+    if (payService == PayService.linepay) {
+      return const Color(0xff08bf5b);
+    } else if (payService == PayService.paypay) {
+      return const Color(0xfff24f4f);
+    } else {
+      return Colors.red;
+    }
+  }
+
+  const LaunchPayButton({
+    Key? key,
+    required this.onPressed,
+    required this.payService,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      child: Text(
+        payServiceText,
+        style: TextStyle(
+          color: payServiceColor,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(
+          color: payServiceColor,
+          width: 2,
+        ),
+        fixedSize: const Size(130, 48),
       ),
     );
   }
