@@ -154,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const sortType = "dist";
 
     final url = Uri.parse(
-        "https://map.yahooapis.jp/search/local/V1/localSearch?appid=${yahooApiKey}&lat=${latitude}&lon=${longitude}&dist=${dist}&output=${outputType}&sort=${sortType}");
+        "https://map.yahooapis.jp/search/local/V1/localSearch?appid=${yahooApiKey}&lat=${latitude}&lon=${longitude}&dist=${dist}&output=${outputType}&sort=${sortType}&results=100");
     final response = await http.get(url);
 
     final Map<String, dynamic> jsonData = jsonDecode(response.body);
