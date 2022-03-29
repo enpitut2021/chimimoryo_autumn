@@ -8,7 +8,6 @@ import 'package:chimimoryo_autumn/models/store.dart';
 import 'package:chimimoryo_autumn/repository/repository.dart';
 import 'package:chimimoryo_autumn/repository/store.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -155,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const sortType = "dist";
 
     final url = Uri.parse(
-        "https://map.yahooapis.jp/search/local/V1/localSearch?appid=${yahooApiKey}&lat=${latitude}&lon=${longitude}&dist=${dist}&output=${outputType}&sort=${sortType}");
+        "https://map.yahooapis.jp/search/local/V1/localSearch?appid=${yahooApiKey}&lat=${latitude}&lon=${longitude}&dist=${dist}&output=${outputType}&sort=${sortType}&results=100");
     final response = await http.get(url);
 
     final Map<String, dynamic> jsonData = jsonDecode(response.body);
@@ -273,7 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("近くのお店"),
+        title: const Text("今いるお店"),
         actions: [
           IconButton(
             onPressed: () {
@@ -288,101 +287,106 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Builder(builder: (context) {
               if (_storeList == null) {
-                return const Padding(
-                  child: Center(child: CircularProgressIndicator()),
-                  padding: EdgeInsets.all(15),
+                return const Flexible(
+                  child: Padding(
+                    child: Center(child: CircularProgressIndicator()),
+                    padding: EdgeInsets.all(15),
+                  ),
                 );
               }
 
               if (_storeList!.isEmpty) {
-                return const Padding(
-                  child: Text(
-                    "見つかりませんでした...",
-                    style: TextStyle(
-                      fontSize: 20,
+                return const Flexible(
+                  child: Padding(
+                    child: Text(
+                      "見つかりませんでした...",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
+                    padding: EdgeInsets.all(15),
                   ),
-                  padding: EdgeInsets.all(15),
                 );
               }
 
-              return ListView.builder(
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  final storeList = _storeList;
-                  if (storeList == null) {
-                    return Container();
-                  }
-                  final store = storeList[index];
-                  if (store.pays.isEmpty) {
-                    return Container();
-                  }
-                  Pay maxBenefitPay = store.pays[0];
-                  num maxBenefit = store.pays[0].benefit;
-                  for (var pay in store.pays) {
-                    if (pay.benefit > maxBenefit) {
-                      maxBenefitPay = pay;
+              return Flexible(
+                child: ListView.builder(
+                  itemBuilder: (context, index) {
+                    final storeList = _storeList;
+                    if (storeList == null) {
+                      return Container();
                     }
-                  }
-                  return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Card(
-                        child: InkWell(
-                          onTap: () {
-                            showUseCouponPopup(maxBenefitPay.name);
-                            if (maxBenefitPay.name == "LINE Pay") {
-                              launchPay("LINE_PAY");
-                            } else {
-                              launchPay("PAY_PAY");
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                Expanded(
-                                    child: ListTile(
-                                  title: Text(store.name),
-                                  subtitle: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        const Icon(
-                                          Icons.place,
-                                          color: Colors.grey,
-                                          size: 18,
+                    final store = storeList[index];
+                    if (store.pays.isEmpty) {
+                      return Container();
+                    }
+                    Pay maxBenefitPay = store.pays[0];
+                    num maxBenefit = store.pays[0].benefit;
+                    for (var pay in store.pays) {
+                      if (pay.benefit > maxBenefit) {
+                        maxBenefitPay = pay;
+                      }
+                    }
+                    return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: Card(
+                          child: InkWell(
+                            onTap: () {
+                              showUseCouponPopup(maxBenefitPay.name);
+                              if (maxBenefitPay.name == "LINE Pay") {
+                                launchPay("LINE_PAY");
+                              } else {
+                                launchPay("PAY_PAY");
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: <Widget>[
+                                  Expanded(
+                                      child: ListTile(
+                                    title: Text(store.name),
+                                    subtitle: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          const Icon(
+                                            Icons.place,
+                                            color: Colors.grey,
+                                            size: 18,
+                                          ),
+                                          Text(
+                                              "${store.distance?.toStringAsFixed(0)} m")
+                                        ]),
+                                  )),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Text(
+                                        maxBenefitPay.name,
+                                        style: TextStyle(
+                                          color:
+                                              (maxBenefitPay.name == "LINE Pay")
+                                                  ? const Color(0xff08bf5b)
+                                                  : const Color(0xfff24f4f),
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                        Text(
-                                            "${store.distance?.toStringAsFixed(0)} m")
-                                      ]),
-                                )),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Text(
-                                      maxBenefitPay.name,
-                                      style: TextStyle(
-                                        color:
-                                            (maxBenefitPay.name == "LINE Pay")
-                                                ? const Color(0xff08bf5b)
-                                                : const Color(0xfff24f4f),
-                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ));
-                },
-                itemCount: _storeList?.length ?? 0,
+                        ));
+                  },
+                  itemCount: _storeList?.length ?? 0,
+                ),
               );
             }),
-            Spacer(),
+            // Spacer(),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
